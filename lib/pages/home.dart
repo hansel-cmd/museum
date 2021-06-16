@@ -1,189 +1,211 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:museum/models/property.dart';
 import 'package:museum/pages/filters.dart';
+import 'package:museum/services/api_connection.dart';
 import 'package:museum/utils/constants.dart';
 import 'package:museum/utils/helper.dart';
-import 'package:museum/utils/static_data.dart';
-import 'package:museum/widgets/bottom_bar.dart';
-import 'package:museum/widgets/input_widget.dart';
-import 'package:museum/widgets/property_card.dart';
+import 'package:museum/widgets/drawer.dart';
+import 'package:museum/widgets/loading.dart';
+import 'package:museum/widgets/art_card.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> with Api {
+  final user = FirebaseAuth.instance.currentUser;
+  bool isLoading = true;
+  bool noDisplay = false;
+  Map collection_object_id = {};
+  List arts = [];
+
+  initState() {
+    // print(user);
+
+    getAllCollections();
+    super.initState();
+  }
+
+  getAllCollections() async {
+    var res = await getAllCollectionObjectID();
+    if (res.isEmpty) {
+      setState(() {
+        isLoading = false;
+        noDisplay = true;
+      });
+      return;
+    }
+    collection_object_id = res;
+    collection_object_id["objectIDs"].shuffle();
+
+    print("next phase na ko");
+    Map temp = {};
+    for (int i = 1; i < collection_object_id["total"]; i++) {
+      temp = await getInfo(collection_object_id["objectIDs"][i]);
+      print("nice");
+      arts.add(temp);
+    }
+
+    // print(arts[0]["title"]);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  getInfo(id) async {
+    var res = await getObjectInfo(id: id);
+
+    if (res.isEmpty) return {};
+
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomBar(),
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  height: 20.0,
-                ),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Find a Thousand Homes\n",
-                        style: TextStyle(
-                          fontSize: 22.0,
-                          height: 1.3,
-                          color: Color.fromRGBO(22, 27, 40, 70),
-                        ),
-                      ),
-                      TextSpan(
-                        text: "For Sell & Rent",
-                        style: TextStyle(
-                          fontSize: 28.0,
-                          fontWeight: FontWeight.w800,
-                          color: Constants.blackColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
+    return isLoading
+        ? Loading()
+        : Scaffold(
+            appBar: AppBar(
+              title: Text("MMAC"),
+            ),
+            endDrawer: DrawerScreen(user: user),
+            body: SafeArea(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: InputWidget(
-                        height: 44.0,
-                        hintText: "Search",
-                        prefixIcon: FlutterIcons.search1_ant,
-                      ),
-                    ),
                     SizedBox(
-                      width: 10.0,
+                      height: 20.0,
                     ),
-                    FlatButton(
-                      height: ScreenUtil().setHeight(44.0),
-                      onPressed: () {
-                        Helper.nextScreen(context, Filters());
-                      },
-                      color: Constants.primaryColor,
-                      child: Row(
-                        children: [
-                          Icon(
-                            FlutterIcons.ios_options_ion,
-                            color: Colors.white,
-                          ),
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          Text(
-                            "Filters",
-                            style: TextStyle(
-                              color: Colors.white,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Art Highlights from\n",
+                                  style: TextStyle(
+                                    fontSize: 22.0,
+                                    height: 1.3,
+                                    color: Color.fromRGBO(22, 27, 40, 70),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Renaissance period",
+                                  style: TextStyle(
+                                     fontSize: 24.0,
+                                    fontWeight: FontWeight.w800,
+                                    color: Constants.blackColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 20.0,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: ScreenUtil().setHeight(52.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color.fromRGBO(255, 136, 0, 1),
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: Text(
-                          "For Sell",
-                          style: TextStyle(
-                            color: Color.fromRGBO(255, 136, 0, 1),
+                        TextButton(
+                          onPressed: () {
+                            Helper.nextScreen(context, Filters());
+                          },
+                          style: ButtonStyle(
+                            padding: MaterialStateProperty.resolveWith(
+                                (states) =>
+                                    EdgeInsets.fromLTRB(10, 10, 10, 10)),
+                            shape: MaterialStateProperty.resolveWith(
+                              (state) => RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            backgroundColor: MaterialStateColor.resolveWith(
+                                (states) => Constants.primaryColor),
+                            foregroundColor: MaterialStateColor.resolveWith(
+                                (states) => Constants.primaryColor),
+                            overlayColor: MaterialStateColor.resolveWith(
+                                (states) => Constants.primaryColor),
                           ),
-                        ),
-                      ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                FlutterIcons.ios_options_ion,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Text(
+                                "Filters",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
                     SizedBox(
-                      width: 20.0,
+                      height: 20.0,
                     ),
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: ScreenUtil().setHeight(52.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color.fromRGBO(255, 136, 0, 1),
-                            width: 2.0,
-                          ),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Text(
-                          "For Rent",
-                          style: TextStyle(
-                            color: Color.fromRGBO(255, 136, 0, 1),
-                          ),
-                        ),
-                      ),
-                    )
+                    
+                    noDisplay
+                        ? Expanded(
+                            child: Center(
+                              child: Text(
+                                "Nothing to display as of the moment.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  height: 1.3,
+                                  color: Color.fromRGBO(22, 27, 40, 70),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: ListView.separated(
+                              separatorBuilder:
+                                  (BuildContext context, int index) {
+                                return SizedBox(
+                                  height: 15.0,
+                                );
+                              },
+                              // itemCount: StaticData.sampleProperties.length,
+                              itemCount: arts.length,
+                              // physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                Property prop = Property(
+                                    title: arts[index]["title"],
+                                    objectName: arts[index]["objectName"],
+                                    department: arts[index]["department"],
+                                    accessionYear: arts[index]["accessionYear"],
+                                    city: arts[index]["city"],
+                                    country: arts[index]["country"],
+                                    primaryImage: arts[index]["primaryImage"],
+                                    primaryImageSmall: arts[index]
+                                        ["primaryImageSmall"],
+                                    additionalImages: arts[index]
+                                        ["additionalImages"],
+                                    isPublicDomain: arts[index]
+                                        ["isPublicDomain"],
+                                    isHighlight: arts[index]["isHighlight"]);
+
+                                return ArtCard(
+                                  property: prop,
+                                );
+                              },
+                            ),
+                          )
                   ],
                 ),
-                SizedBox(
-                  height: 25.0,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "New Properties",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Constants.blackColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      "View all",
-                      style: TextStyle(
-                        fontSize: 15.0,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 25.0,
-                ),
-                ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      height: 15.0,
-                    );
-                  },
-                  itemCount: StaticData.sampleProperties.length,
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int index) {
-                    return PropertyCard(
-                      property: StaticData.sampleProperties[index],
-                    );
-                  },
-                )
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 Future<String> register({String email, String password}) async {
 
@@ -26,7 +27,6 @@ Future<String> signIn({String email, String password}) async {
 
     return "successful";
   } on FirebaseAuthException catch (err) {
-    print(err.code);
     if (err.code == "invalid-email") return "Invalid Email.";
 
     if (err.code == "user-not-found") return "User is not found.";
@@ -37,9 +37,36 @@ Future<String> signIn({String email, String password}) async {
 }
 
 Future<void> signOut() async {
+
   try {
     await FirebaseAuth.instance.signOut();
   } catch (e) {
     print("SIGN OUT ERROR: " + e.toString());
+  }
+}
+
+Future<bool> loginWithGoogle() async {
+
+  try {
+    GoogleSignIn googleSignIn = GoogleSignIn();
+    GoogleSignInAccount account = await googleSignIn.signIn();
+
+    if (account == null)
+      return false;
+
+    final googleAuth = await account.authentication;
+    
+    UserCredential user = await FirebaseAuth.instance.signInWithCredential(GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken
+    ));
+
+    if (user.user == null)
+      return false;
+
+    return true;
+    
+  } catch (e) {
+    print("LOGIN WITH GOOGLE ERROR: " + e.toString());
   }
 }

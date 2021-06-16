@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:museum/pages/authentication.dart';
 import 'package:museum/utils/constants.dart';
+import 'package:museum/utils/helper.dart';
 import 'package:museum/widgets/primary_button.dart';
 
 class Welcome extends StatelessWidget {
@@ -47,7 +49,7 @@ class Welcome extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                              text: "the best property.",
+                              text: "all the historical arts.",
                               style: TextStyle(
                                 fontSize: 28.0,
                                 height: 1.3,
@@ -61,7 +63,7 @@ class Welcome extends StatelessWidget {
                         height: 20.0,
                       ),
                       Text(
-                        "Find the best property you want by your location or neighbourhood",
+                        "Find and explore the historical arts that are over 5,000 years old present in Metropolitan Museum of Arts Collection.",
                         style: TextStyle(
                           height: 1.70,
                           color: Color.fromRGBO(110, 121, 136, 1),
@@ -72,6 +74,9 @@ class Welcome extends StatelessWidget {
                       ),
                       PrimaryButton(
                         text: "Get Started",
+                        onPressed: () {
+                          Helper.nextScreen(context, Authentication());
+                        },
                       ),
                     ],
                   ),
