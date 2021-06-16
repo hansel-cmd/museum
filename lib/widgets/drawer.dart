@@ -20,7 +20,7 @@ class DrawerScreen extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              flex: 2,
+              flex: 1,
               child: DrawerHeader(
                 margin: EdgeInsets.zero,
                 padding: EdgeInsets.zero,
@@ -29,65 +29,32 @@ class DrawerScreen extends StatelessWidget {
                     width: MediaQuery.of(context).size.width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Metropolitan Museum\n",
-                                      style: TextStyle(
-                                        fontSize: 22.0,
-                                        height: 1.3,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "of Arts Collection",
-                                      style: TextStyle(
-                                        fontSize: 22.0,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                        Container(
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          child: CircleAvatar(
+                            backgroundImage: user.photoURL != null
+                                ? NetworkImage(user.photoURL)
+                                : AssetImage("assets/images/050-fox.png"),
+                            radius: 40.0,
                           ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: CircleAvatar(
-                                backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL) : AssetImage("assets/images/050-fox.png"),
-                                radius: 40.0,
-                              ),
-                            ),
-                            Text(user.displayName != null ? "${user.displayName}" : "Anonymous",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  color: Colors.white,
-                                )),
-                            Text(
-                              "${user.email}",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        )
+                        Text(
+                            user.displayName != null
+                                ? "${user.displayName}"
+                                : "Anonymous",
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                            )),
+                        Text(
+                          "${user.email}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
                       ],
                     )),
               ),
