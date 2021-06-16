@@ -6,9 +6,12 @@ class InputWidget extends StatelessWidget {
   final IconData prefixIcon;
   final double height;
   final bool isHidden;
+  final bool isSuffixIconNeeded;
+  final TextEditingController textcontroller;
+  final Function onTap;
 
 
-  InputWidget({this.hintText, this.prefixIcon, this.height = 53.0, this.isHidden = false});
+  InputWidget({this.hintText, this.prefixIcon, this.height = 53.0, this.isHidden = false, this.textcontroller, this.onTap, this.isSuffixIconNeeded = false});
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -22,6 +25,7 @@ class InputWidget extends StatelessWidget {
         left: this.prefixIcon == null ? 16.0 : 0.0,
       ),
       child: TextFormField(
+        controller: textcontroller,
         obscureText: isHidden,
         decoration: InputDecoration(
           prefixIcon: this.prefixIcon == null
@@ -30,6 +34,11 @@ class InputWidget extends StatelessWidget {
                   this.prefixIcon,
                   color: Color.fromRGBO(105, 108, 121, 1),
                 ),
+          suffixIcon: isSuffixIconNeeded ? GestureDetector(
+            onTap: onTap,
+            child: Icon(isHidden ? Icons.visibility_off : Icons.visibility),
+          )
+          : null,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
           border: OutlineInputBorder(

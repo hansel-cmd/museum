@@ -11,4 +11,14 @@ class Helper {
       ),
     );
   }
+
+  static nextScreenWithoutPrevious(BuildContext context, Widget screen) {
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(
+        builder: (BuildContext context) {
+          return screen;
+        },
+      ),
+    );
+  }
 }
