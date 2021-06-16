@@ -22,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
               color: Color.fromRGBO(169, 176, 185, 0.42),
               spreadRadius: 0,
               blurRadius: 8,
-              offset: Offset(0, 2), // changes position of shadow
+              offset: Offset(0, 2),
             ),
           ],
         ),

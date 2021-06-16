@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:museum/utils/constants.dart';
-import 'package:museum/utils/static_data.dart';
-import 'package:museum/widgets/property_card.dart';
+import 'package:museum/widgets/art_card.dart';
 
 class SearchResult extends StatelessWidget {
   @override
@@ -49,13 +48,15 @@ class SearchResult extends StatelessWidget {
                     height: 15.0,
                   );
                 },
-                itemCount: StaticData.sampleProperties.length,
+                // itemCount: StaticData.sampleProperties.length,
+                itemCount: 0,
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemBuilder: (BuildContext context, int index) {
-                  return PropertyCard(
-                    property: StaticData.sampleProperties[index],
-                  );
+                  // return ArtCard(
+                  //   property: StaticData.sampleProperties[index],
+                  // );
+                  return null;
                 },
               )
             ],
