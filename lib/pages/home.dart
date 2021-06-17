@@ -45,8 +45,6 @@ class _HomeState extends State<Home> with Api {
     collectionObjectId = res;
     collectionObjectId["objectIDs"].shuffle();
 
-    print("next phase na ko");
-
     int i;
     for (i = 1; i < 30 && i < collectionObjectId["total"]; i++) {
       getObjectInfo(id: collectionObjectId["objectIDs"][i]).then((value) {
@@ -58,18 +56,24 @@ class _HomeState extends State<Home> with Api {
     }
 
     getAllDepartment().then((value) {
-      print("value is: ");
       setState(() {
         departmentObject = value;
       });
-      print(departmentObject);
       return value;
     });
 
-    setState(() {
-      counter = i;
-      isLoading = false;
-    });
+    if (i >= collectionObjectId["total"]) {
+      setState(() {
+        isMax = true;
+        counter = i;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        counter = i;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -119,10 +123,15 @@ class _HomeState extends State<Home> with Api {
                             ),
                           ),
                           TextButton(
-                            onPressed: departmentObject.isEmpty ? null : () {
-                              Helper.nextScreen(context,
-                                  Filters(departmentObject: departmentObject));
-                            },
+                            onPressed: departmentObject.isEmpty
+                                ? null
+                                : () {
+                                    Helper.nextScreen(
+                                        context,
+                                        Filters(
+                                            departmentObject:
+                                                departmentObject));
+                                  },
                             style: ButtonStyle(
                               padding: MaterialStateProperty.resolveWith(
                                   (states) =>
@@ -166,7 +175,7 @@ class _HomeState extends State<Home> with Api {
                           ? Expanded(
                               child: Center(
                                 child: SpinKitRing(
-                  size: 40, color: Constants.primaryColor),
+                                    size: 40, color: Constants.primaryColor),
                               ),
                             )
                           : noDisplay
@@ -259,7 +268,6 @@ class _HomeState extends State<Home> with Api {
           arts.add(value);
         });
       });
-      print("nice");
     }
 
     Future.delayed(Duration(milliseconds: 800), () {
@@ -270,7 +278,7 @@ class _HomeState extends State<Home> with Api {
       counter = i;
     });
 
-    if (counter == collectionObjectId["total"]) {
+    if (counter >= collectionObjectId["total"]) {
       setState(() {
         isMax = true;
       });

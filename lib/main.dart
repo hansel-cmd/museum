@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:museum/pages/authentication.dart';
 import 'package:museum/pages/welcome.dart';
 import 'package:museum/utils/constants.dart';
-import 'package:museum/widgets/loading.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
           textTheme: GoogleFonts.poppinsTextTheme(),
         ),
-        home: Authentication(),
+        home: Welcome(),
       ),
     );
   }

@@ -47,14 +47,20 @@ class _SearchResultState extends State<SearchResult> with Api {
         setState(() {
           arts.add(value);
           isLoadingForCards = false;
-          print(arts);
         });
       });
     }
 
-    setState(() {
-      counter = i;
-    });
+    if (i >= filteredObjectId["total"]) {
+      setState(() {
+        isMax = true;
+        counter = i;
+      });
+    } else {
+      setState(() {
+        counter = i;
+      });
+    }
   }
 
   @override
@@ -162,7 +168,6 @@ class _SearchResultState extends State<SearchResult> with Api {
           arts.add(value);
         });
       });
-      print("nice");
     }
 
     Future.delayed(Duration(milliseconds: 800), () {
@@ -173,7 +178,7 @@ class _SearchResultState extends State<SearchResult> with Api {
       counter = i;
     });
 
-    if (counter == filteredObjectId["total"]) {
+    if (counter >= filteredObjectId["total"]) {
       setState(() {
         isMax = true;
       });
