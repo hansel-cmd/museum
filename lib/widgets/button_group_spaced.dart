@@ -2,28 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:museum/utils/constants.dart';
 
 class ButtonGroupSpaced extends StatefulWidget {
-  final List<String> items;
+  
+  final List departments;
+  final int activeIndex;
+  final Function callBack;
 
-  ButtonGroupSpaced({this.items});
+
+  ButtonGroupSpaced({this.activeIndex, this.callBack, this.departments});
 
   @override
-  _ButtonGroupSpacedState createState() => _ButtonGroupSpacedState();
+  _ButtonGroupSpacedState createState() => _ButtonGroupSpacedState(activeIndex: this.activeIndex, callBack: this.callBack);
 }
 
 class _ButtonGroupSpacedState extends State<ButtonGroupSpaced> {
-  int activeIndex = 0;
+
+  int activeIndex;
+  Function callBack;
+  _ButtonGroupSpacedState({this.activeIndex, this.callBack});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Wrap(
-        children: this.widget.items.map((item) {
-          int currentIndex = this.widget.items.indexOf(item);
+        children: this.widget.departments.map((item) {
+          int currentIndex = this.widget.departments.indexOf(item);
           return GestureDetector(
             onTap: () {
               setState(() {
                 activeIndex = currentIndex;
               });
+              callBack(currentIndex);
             },
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
@@ -36,7 +44,7 @@ class _ButtonGroupSpacedState extends State<ButtonGroupSpaced> {
                       : Color.fromRGBO(163, 167, 168, 1),
                 ),
               ),
-              child: Text(item),
+              child: Text(item["displayName"]),
             ),
           );
         }).toList(),

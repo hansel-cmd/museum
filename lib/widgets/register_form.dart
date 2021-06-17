@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:museum/pages/home.dart';
 import 'package:museum/services/database_connection.dart';
 import 'package:museum/utils/helper.dart';
@@ -23,34 +24,36 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ErrorMessage(message: errorMessage),
-            InputWidget(
-              hintText: "Email Address",
-              prefixIcon: FlutterIcons.mail_ant,
-              textcontroller: _email,
-            ),
-            SizedBox(height: 15.0),
-            InputWidget(
-              hintText: "Password",
-              prefixIcon: FlutterIcons.lock_ant,
-              isHidden: isHidden,
-              isSuffixIconNeeded: true,
-              textcontroller: _password,
-              onTap: setPasswordVisibility
-            ),
-            SizedBox(height: 25.0),
-            PrimaryButton(
-              text: "Register",
-              onPressed: registerMe,
-            ),
-          ],
+    return LoaderOverlay(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ErrorMessage(message: errorMessage),
+              InputWidget(
+                hintText: "Email Address",
+                prefixIcon: FlutterIcons.mail_ant,
+                textcontroller: _email,
+              ),
+              SizedBox(height: 15.0),
+              InputWidget(
+                hintText: "Password",
+                prefixIcon: FlutterIcons.lock_ant,
+                isHidden: isHidden,
+                isSuffixIconNeeded: true,
+                textcontroller: _password,
+                onTap: setPasswordVisibility
+              ),
+              SizedBox(height: 25.0),
+              PrimaryButton(
+                text: "Register",
+                onPressed: registerMe,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -85,9 +88,11 @@ class _RegisterFormState extends State<RegisterForm> {
       return;
     }
 
+    context.loaderOverlay.show();
     String res;
 
     res = await register(email: _email.text, password: _password.text);
+    context.loaderOverlay.hide();
     if (res == "successful") {
       Helper.nextScreenWithoutPrevious(context, Home());
       return;

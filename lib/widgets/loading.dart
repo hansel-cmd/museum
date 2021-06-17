@@ -21,7 +21,7 @@ class Loading extends StatelessWidget {
             height: 20,
           ),
           Text(
-            "Please wait for a bit \nwhile we are preparing...\nWala silay pagination gihatag.\n\n\n\nWala sad silay gihatag na\n number of items \nna pwede i-fetch. Sadt.",
+            "Please wait for a bit \nwhile we are preparing...",
             style: TextStyle(
               fontSize: 16.0,
               color: Constants.blackColor,

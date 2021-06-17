@@ -6,14 +6,13 @@ class Api {
   Map endpoints = {
     "objects":
         "objects", // A listing of all valid Object IDs available for access
-    "departments": "department", //  A listing of all valid departments
+    "departments": "departments", //  A listing of all valid departments
     "search": "search"
   };
 
   Future<Map> getAllCollectionObjectID() async {
-    // dmd kung tanan oy, mamatay tag hinuwat, wa rabay offset or pagination or perPage pota
-    // kani nalang
-    var url = Uri.parse("$base_url" + "search?isHighlight=true&dateBegin=1700&dateEnd=1800&q=France");
+
+    var url = Uri.parse("$base_url" + "search?isHighlight=true|false&dateBegin=1700&dateEnd=1800&q=France");
     var res;
     try {
       res = await http.get(url);
@@ -51,5 +50,50 @@ class Api {
     }
     
     return {};
+  }
+
+  Future<Map> getAllDepartment() async {
+
+    var url = Uri.parse("$base_url" + "${endpoints['departments']}");
+    var res;
+    try {
+
+      res = await http.get(url);
+
+      if (res.statusCode == 200) {
+        var jsonResponse = convert.jsonDecode(res.body) as Map;
+
+        return jsonResponse;
+      }
+
+      print("Request failed with status: ${res.statusCode}");
+    } catch (e) {
+      print("REQUEST FAILED while getting all departments: " + e.toString());
+    }
+    
+    return {};
+  }
+
+  Future<Map> getFilteredItems(id) async {
+
+    var url = Uri.parse("$base_url" + "search?departmentId=$id&isHighlight=true|false&q=Europe");
+    var res;
+    try {
+
+      res = await http.get(url);
+
+      if (res.statusCode == 200) {
+        var jsonResponse = convert.jsonDecode(res.body) as Map;
+
+        return jsonResponse;
+      }
+
+      print("Request failed with status: ${res.statusCode}");
+    } catch (e) {
+      print("REQUEST FAILED while getting all departments: " + e.toString());
+    }
+    
+    return {};
+
   }
 }

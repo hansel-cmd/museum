@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:museum/models/property.dart';
 import 'package:museum/pages/filters.dart';
@@ -20,14 +21,14 @@ class _HomeState extends State<Home> with Api {
   final user = FirebaseAuth.instance.currentUser;
   bool isLoading = true;
   bool noDisplay = false;
-  Map collection_object_id = {};
+  bool isLoadingForCards = true;
+  Map collectionObjectId = {};
   List arts = [];
+  Map departmentObject = {};
   int counter = 0;
   bool isMax = false;
 
   initState() {
-    // print(user);
-
     getAllCollections();
     super.initState();
   }
@@ -41,33 +42,38 @@ class _HomeState extends State<Home> with Api {
       });
       return;
     }
-    collection_object_id = res;
-    collection_object_id["objectIDs"].shuffle();
+    collectionObjectId = res;
+    collectionObjectId["objectIDs"].shuffle();
 
-    print("next phase na ko");
-    
-    Map temp = {};
     int i;
-    for (i = 1; i < 5 && i < collection_object_id["total"]; i++) {
-      temp = await getInfo(collection_object_id["objectIDs"][i]);
-      print("nice");
-      arts.add(temp);
+    for (i = 1; i < 30 && i < collectionObjectId["total"]; i++) {
+      getObjectInfo(id: collectionObjectId["objectIDs"][i]).then((value) {
+        setState(() {
+          arts.add(value);
+          isLoadingForCards = false;
+        });
+      });
     }
 
-    // print(arts[0]["title"]);
-
-    setState(() {
-      counter = i;
-      isLoading = false;
+    getAllDepartment().then((value) {
+      setState(() {
+        departmentObject = value;
+      });
+      return value;
     });
-  }
 
-  getInfo(id) async {
-    var res = await getObjectInfo(id: id);
-
-    if (res.isEmpty) return {};
-
-    return res;
+    if (i >= collectionObjectId["total"]) {
+      setState(() {
+        isMax = true;
+        counter = i;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        counter = i;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -117,9 +123,15 @@ class _HomeState extends State<Home> with Api {
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Helper.nextScreen(context, Filters());
-                            },
+                            onPressed: departmentObject.isEmpty
+                                ? null
+                                : () {
+                                    Helper.nextScreen(
+                                        context,
+                                        Filters(
+                                            departmentObject:
+                                                departmentObject));
+                                  },
                             style: ButtonStyle(
                               padding: MaterialStateProperty.resolveWith(
                                   (states) =>
@@ -159,62 +171,83 @@ class _HomeState extends State<Home> with Api {
                       SizedBox(
                         height: 20.0,
                       ),
-                      noDisplay
+                      isLoadingForCards
                           ? Expanded(
                               child: Center(
-                                child: Text(
-                                  "Nothing to display as of the moment.",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    height: 1.3,
-                                    color: Color.fromRGBO(22, 27, 40, 70),
-                                  ),
-                                ),
+                                child: SpinKitRing(
+                                    size: 40, color: Constants.primaryColor),
                               ),
                             )
-                          : Expanded(
-                              child: ListView.separated(
-                                separatorBuilder:
-                                    (BuildContext context, int index) {
-                                  return SizedBox(
-                                    height: 15.0,
-                                  );
-                                },
-                                // itemCount: StaticData.sampleProperties.length,
-                                itemCount: arts.length,
-                                // physics: NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemBuilder: (BuildContext context, int index) {
-                                  Property prop = Property(
-                                      title: arts[index]["title"],
-                                      objectName: arts[index]["objectName"],
-                                      department: arts[index]["department"],
-                                      accessionYear: arts[index]["accessionYear"],
-                                      city: arts[index]["city"],
-                                      country: arts[index]["country"],
-                                      primaryImage: arts[index]["primaryImage"],
-                                      primaryImageSmall: arts[index]
-                                          ["primaryImageSmall"],
-                                      additionalImages: arts[index]
-                                          ["additionalImages"],
-                                      isPublicDomain: arts[index]
-                                          ["isPublicDomain"],
-                                      isHighlight: arts[index]["isHighlight"]);
+                          : noDisplay
+                              ? Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      "Nothing to display as of the moment.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        height: 1.3,
+                                        color: Color.fromRGBO(22, 27, 40, 70),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Expanded(
+                                  child: ListView(
+                                    children: [
+                                      ListView.separated(
+                                        separatorBuilder:
+                                            (BuildContext context, int index) {
+                                          return SizedBox(
+                                            height: 15.0,
+                                          );
+                                        },
+                                        itemCount: arts.length,
+                                        physics: ScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          Property prop = Property(
+                                              title: arts[index]["title"],
+                                              objectName: arts[index]
+                                                  ["objectName"],
+                                              department: arts[index]
+                                                  ["department"],
+                                              accessionYear: arts[index]
+                                                  ["accessionYear"],
+                                              city: arts[index]["city"],
+                                              country: arts[index]["country"],
+                                              primaryImage: arts[index]
+                                                  ["primaryImage"],
+                                              primaryImageSmall: arts[index]
+                                                  ["primaryImageSmall"],
+                                              additionalImages: arts[index]
+                                                  ["additionalImages"],
+                                              isPublicDomain: arts[index]
+                                                  ["isPublicDomain"],
+                                              isHighlight: arts[index]
+                                                  ["isHighlight"]);
 
-                                  return ArtCard(
-                                    property: prop,
-                                  );
-                                },
-                              ),
-                            ),
-                      !isMax
-                          ? TextButton(
-                              onPressed: fetch,
-                              child: Text(
-                                "Load More...",
-                              ))
-                          : Container(),
+                                          return ArtCard(
+                                            property: prop,
+                                          );
+                                        },
+                                      ),
+                                      !isMax
+                                          ? arts.length != 0
+                                              ? TextButton(
+                                                  onPressed: fetch,
+                                                  child: Text(
+                                                    "Load More...",
+                                                    style: TextStyle(
+                                                      letterSpacing: 1.2,
+                                                    ),
+                                                  ))
+                                              : Container()
+                                          : Container(),
+                                    ],
+                                  ),
+                                )
                     ],
                   ),
                 ),
@@ -224,29 +257,31 @@ class _HomeState extends State<Home> with Api {
   }
 
   void fetch() async {
-
     context.loaderOverlay.show();
-    Map temp = {};
+
     int i;
-    for ( i = counter;
-        i < (counter + 5) && i < collection_object_id["total"];
+    for (i = counter;
+        i < (counter + 5) && i < collectionObjectId["total"];
         i++) {
-      temp = await getInfo(collection_object_id["objectIDs"][i]);
-      print("nice");
-      arts.add(temp);
+      getObjectInfo(id: collectionObjectId["objectIDs"][i]).then((value) {
+        setState(() {
+          arts.add(value);
+        });
+      });
     }
 
-    context.loaderOverlay.hide();
+    Future.delayed(Duration(milliseconds: 800), () {
+      context.loaderOverlay.hide();
+    });
 
     setState(() {
       counter = i;
     });
 
-    if (counter == collection_object_id["total"]) {
+    if (counter >= collectionObjectId["total"]) {
       setState(() {
-        isMax = true;      
+        isMax = true;
       });
     }
   }
-
 }
